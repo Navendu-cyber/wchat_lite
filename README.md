@@ -1,7 +1,7 @@
 # WChat Lite
 
 **WChat Lite** is a lightweight, privacy-focused Linux desktop wrapper for WhatsApp Web.  
-Built with **Python**, **GTK3**, and **WebKit2GTK**, it adds security and usability features that WhatsApp Web does not provide — including **password lock**, **blurred privacy screen**, **auto-lock**, **smooth UI**, and **optional desktop integration features**.
+Built with **Python**, **GTK3**, and **WebKit2GTK**, it adds security and usability features that WhatsApp Web does not provide — including **password lock**, **blurred privacy screen**, **auto-lock**, **background sync**, and **desktop integration**.
 
 ---
 
@@ -12,114 +12,101 @@ Built with **Python**, **GTK3**, and **WebKit2GTK**, it adds security and usabil
 - First launch asks you to create a password.
 - Your password is **not stored directly** — only its **SHA-256 hash** is saved.
 
-### 🔏 **What Does Password Hashing Mean?**
-- The app stores a *one-way hash* such as:
-a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e
-
-markdown
-Copy code
-- This is **NOT** your password — it cannot be reversed.
-- Even if someone opens your config file, they **cannot see your password**.
-
 ### 🧊 **Blurred Lock Screen**
-When the app locks, it captures the window and creates a **blurred background** behind the login dialog for privacy — similar to macOS.
+- When the app locks, it captures the window and creates a **blurred background** behind the login dialog for privacy — similar to macOS.
+
+### 🔄 **Background Sync & Tray Mode**
+- **Background Sync**: The app polls for new messages even when minimized or hidden.
+- **System Tray Icon**: Keeps the app running in the background.
+- **Taskbar Alert**: When you close the window, a notification reminds you: *"WChat lives in the taskbar."*
+
+### 🔔 **Desktop Notifications**
+- Receive native Linux desktop notifications for new messages.
+- Works even when the app is minimized or hidden in the tray.
+- Can be toggled on/off in settings.
 
 ### ⏱️ **Auto-Lock on Inactivity**
-- The app automatically locks after X seconds of no activity.
-- Time can be changed in settings.
+- The app automatically locks after a set period of inactivity (default: 5 minutes).
+- Timeout duration can be customized in settings.
 
 ### 🖥️ **Smooth & Polished UI**
-- Smooth scrolling enabled for WebKit.
-- Custom CSS for clarity and better readability.
-- Header icons styled to be properly circular.
-- Settings window fully redesigned for visibility.
-
-### 🔔 **Desktop Notifications (Optional)**
-- Receive message notifications on your Linux desktop.
-- Can be turned on/off in settings.
-- Automatically disabled if `libnotify` is missing.
+- **Dark Mode**: Matches WhatsApp Web's dark theme perfectly.
+- **Glassmorphism**: Modern, semi-transparent lock screen card.
+- **Smooth Scrolling**: Enabled for a fluid experience.
+- **Native Feel**: Circular header icons and clean settings dialog.
 
 ### 🛡️ **No Account Data Stored**
-WChat Lite does NOT store or access WhatsApp messages.  
-Everything stays inside the official WhatsApp Web sandbox.
+- WChat Lite does NOT store or access your WhatsApp messages.  
+- Everything stays inside the official WhatsApp Web sandbox.
 
 ---
 
 ## 📦 Installation
 
-### ✅ System Dependencies (Ubuntu/Debian)
-You must install GTK3 + WebKit2GTK:
+### 1. Install System Dependencies
+You need **GTK3**, **WebKit2GTK**, and **libnotify** (for notifications).
 
+**Ubuntu / Debian / Linux Mint:**
 ```bash
 sudo apt update
-sudo apt install python3-gi gir1.2-gtk-3.0 gir1.2-webkit2-4.1
-Optional (for desktop notifications)
-bash
-Copy code
-sudo apt install libnotify-bin libnotify4 gir1.2-notify-0.7
-📁 Clone & Run
-bash
-Copy code
+sudo apt install python3-gi gir1.2-gtk-3.0 gir1.2-webkit2-4.1 libnotify-bin gir1.2-notify-0.7 gir1.2-appindicator3-0.1
+```
+*(Note: `gir1.2-appindicator3-0.1` is recommended for the tray icon, but the app will fallback to a standard status icon if missing.)*
+
+### 2. Clone the Repository
+```bash
 git clone https://github.com/Navendu-cyber/wchat_lite.git
 cd wchat_lite
+```
+
+### 3. Run the Application
+```bash
 python3 main.py
-🛠️ Troubleshooting
-❌ ModuleNotFoundError: No module named 'gi'
-You forgot to install python3-gi:
+```
 
-bash
-Copy code
-sudo apt install python3-gi
-❌ ValueError: Namespace WebKit2 not available
-Install WebKit2 introspection:
+---
 
-bash
-Copy code
-sudo apt install gir1.2-webkit2-4.1
-❌ Notifications Disabled
-If you see:
+## ⚙️ Configuration
 
-pgsql
-Copy code
-Warning: libnotify not found. Notifications will be disabled.
-Install:
+Your settings are stored securely in your home directory:
+`~/.config/whatsapp-lite/config.json`
 
-bash
-Copy code
-sudo apt install libnotify-bin libnotify4 gir1.2-notify-0.7
-🔧 Configuration File
-Your settings are stored at:
-
-arduino
-Copy code
-~/.config/wchat_lite/config.json
 This file contains:
+- **password_hash**: SHA-256 hash of your lock password.
+- **auto_lock_timeout**: Seconds before auto-lock.
+- **feature_***: Toggles for various features.
 
-auto-lock setting
+> **Note:** Never manually edit the password hash unless you know what you are doing. If you forget your password, you can delete this file to reset the app (this will NOT delete your WhatsApp data, only the app lock settings).
 
-password hash
+---
 
-feature toggles
+## 🛠️ Troubleshooting
 
-Never manually edit the password hash.
+**❌ ModuleNotFoundError: No module named 'gi'**
+```bash
+sudo apt install python3-gi
+```
 
-📸 Screenshots (Coming Soon)
-pgsql
-Copy code
-[ Add Lock Screen Image Here ]
-[ Add Main Window Screenshot Here ]
-[ Add Settings Window Screenshot Here ]
-📜 License
-This project is licensed under the MIT License.
+**❌ ValueError: Namespace WebKit2 not available**
+```bash
+sudo apt install gir1.2-webkit2-4.1
+```
 
-Disclaimer:
-This project is not affiliated with, endorsed by, or associated with WhatsApp or Meta.
-It simply provides a secure desktop wrapper around the official https://web.whatsapp.com interface.
+**❌ Notifications Disabled / Warning: libnotify not found**
+```bash
+sudo apt install libnotify-bin gir1.2-notify-0.7
+```
 
-🌟 Contributing
-Pull requests are welcome!
-The app uses a clean modular structure — each new feature (shortcuts, AI helper, notifications, etc.) lives in its own module.
+---
 
-❤️ Author
-Navendu
-Linux + Flutter + Cybersecurity enthusiast
+## 📜 License
+This project is licensed under the **MIT License**.
+
+**Disclaimer:**
+This project is not affiliated with, endorsed by, or associated with WhatsApp or Meta. It simply provides a secure desktop wrapper around the official [WhatsApp Web](https://web.whatsapp.com) interface.
+
+---
+
+## ❤️ Author
+**Navendu**  
+*Linux + Flutter + Cybersecurity enthusiast*
