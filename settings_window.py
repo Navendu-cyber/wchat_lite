@@ -10,9 +10,10 @@ class PasswordChangeDialog(Gtk.Dialog):
         self.config_manager = config_manager
         self.set_default_size(300, 250)
         self.set_modal(True)
-        self.set_border_width(20)
+        self.set_border_width(0)
         
         box = self.get_content_area()
+        box.get_style_context().add_class("settings-window")
         box.set_spacing(16)
 
         # Current Password
@@ -70,29 +71,36 @@ class SettingsWindow(Gtk.Dialog):
     def __init__(self, parent, config_manager):
         super().__init__(title="Settings", transient_for=parent, flags=0)
         self.config_manager = config_manager
-        self.set_default_size(400, 350)
+        self.set_default_size(450, 400)
         self.set_modal(True)
-        self.set_border_width(20)
+        self.set_border_width(0) # We handle padding in content area
 
         content_area = self.get_content_area()
+        content_area.get_style_context().add_class("settings-window")
         
         # Main Container
-        main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=20)
+        main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=16)
+        main_box.set_margin_top(20)
+        main_box.set_margin_bottom(20)
+        main_box.set_margin_start(20)
+        main_box.set_margin_end(20)
         content_area.add(main_box)
 
         # --- General Section ---
         general_label = Gtk.Label()
-        general_label.set_markup("<b>General</b>")
+        general_label.set_markup("<b>General Settings</b>")
         general_label.set_halign(Gtk.Align.START)
+        general_label.set_xalign(0)
         main_box.pack_start(general_label, False, False, 0)
 
         # Auto-Lock Timeout
         timeout_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
         timeout_label = Gtk.Label(label="Auto-lock timeout (seconds)")
+        timeout_label.set_xalign(0)
         self.timeout_spin = Gtk.SpinButton.new_with_range(30, 3600, 30)
         self.timeout_spin.set_value(self.config_manager.get("auto_lock_timeout"))
         
-        timeout_box.pack_start(timeout_label, False, False, 0)
+        timeout_box.pack_start(timeout_label, True, True, 0)
         timeout_box.pack_end(self.timeout_spin, False, False, 0)
         main_box.pack_start(timeout_box, False, False, 0)
 
@@ -102,10 +110,14 @@ class SettingsWindow(Gtk.Dialog):
         change_pass_btn.set_halign(Gtk.Align.END)
         main_box.pack_start(change_pass_btn, False, False, 0)
 
+        # Separator
+        main_box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), False, False, 8)
+
         # --- Features Section ---
         features_label = Gtk.Label()
         features_label.set_markup("<b>Features</b>")
         features_label.set_halign(Gtk.Align.START)
+        features_label.set_xalign(0)
         main_box.pack_start(features_label, False, False, 0)
 
         # Feature Toggles
@@ -121,19 +133,30 @@ class SettingsWindow(Gtk.Dialog):
         for key, label_text in features:
             hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
             label = Gtk.Label(label=label_text)
+            label.set_xalign(0)
             switch = Gtk.Switch()
             switch.set_active(self.config_manager.get(key) or False)
             
-            hbox.pack_start(label, False, False, 0)
+            hbox.pack_start(label, True, True, 0)
             hbox.pack_end(switch, False, False, 0)
             main_box.pack_start(hbox, False, False, 0)
             self.feature_switches[key] = switch
 
-        # Buttons Area
-        # Standard Dialog action area is usually at the bottom, but we can use our own if we want.
-        # But Gtk.Dialog handles it. Let's just add buttons.
-        self.add_button("Cancel", Gtk.ResponseType.CANCEL)
-        self.add_button("Save", Gtk.ResponseType.OK)
+        # Buttons Area - Custom buttons to match theme
+        button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        button_box.set_halign(Gtk.Align.END)
+        button_box.set_margin_top(20)
+        main_box.pack_start(button_box, False, False, 0)
+
+        cancel_btn = Gtk.Button(label="Cancel")
+        cancel_btn.get_style_context().add_class("unlock-button")
+        cancel_btn.connect("clicked", lambda w: self.response(Gtk.ResponseType.CANCEL))
+        button_box.pack_start(cancel_btn, False, False, 0)
+
+        save_btn = Gtk.Button(label="Save")
+        save_btn.get_style_context().add_class("unlock-button")
+        save_btn.connect("clicked", lambda w: self.response(Gtk.ResponseType.OK))
+        button_box.pack_start(save_btn, False, False, 0)
         
         self.show_all()
 

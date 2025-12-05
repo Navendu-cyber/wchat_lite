@@ -25,6 +25,7 @@ class LockScreen(Gtk.EventBox):
         # Login Card (The visible box)
         self.card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=16)
         self.card.get_style_context().add_class("card")
+        self.card.get_style_context().add_class("lock-card")
         # Add some padding/margin to the card via CSS or widget props if needed
         # For now, we rely on the theme.py styling for internal widgets
         
@@ -42,6 +43,9 @@ class LockScreen(Gtk.EventBox):
         self.password_entry = Gtk.Entry()
         self.password_entry.set_visibility(False)
         self.password_entry.set_placeholder_text("Enter Password")
+        self.password_entry.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, "view-reveal-symbolic")
+        self.password_entry.set_icon_tooltip_text(Gtk.EntryIconPosition.SECONDARY, "Show/Hide Password")
+        self.password_entry.connect("icon-press", self.on_password_icon_press)
         self.password_entry.connect("activate", self.on_unlock_clicked)
         self.card.pack_start(self.password_entry, False, False, 0)
 
@@ -53,7 +57,7 @@ class LockScreen(Gtk.EventBox):
         
         # Unlock/Set Button
         self.action_button = Gtk.Button(label="Unlock")
-        self.action_button.get_style_context().add_class("suggested-action")
+        self.action_button.get_style_context().add_class("unlock-button")
         self.action_button.connect("clicked", self.on_unlock_clicked)
         self.card.pack_start(self.action_button, False, False, 0)
 
@@ -88,6 +92,23 @@ class LockScreen(Gtk.EventBox):
             self.subtitle_label.set_text("Locked")
             self.action_button.set_label("Unlock")
             self.confirm_entry.hide()
+
+    def on_password_icon_press(self, entry, icon_pos, event):
+        if icon_pos == Gtk.EntryIconPosition.SECONDARY:
+            current_vis = entry.get_visibility()
+            entry.set_visibility(not current_vis)
+            
+            # Update icon
+            icon_name = "view-reveal-symbolic" if not current_vis else "view-remove-symbolic" # Logic inverted because we just flipped it? No, wait.
+            # If it WAS visible (True), we set it to False (hidden). Icon should be 'reveal' (eye).
+            # If it WAS hidden (False), we set it to True (visible). Icon should be 'remove' (crossed eye) or just stay 'reveal' but usually it changes.
+            # Let's stick to simple toggle.
+            # Actually standard is:
+            # Visible -> Icon: view-remove (hide)
+            # Hidden -> Icon: view-reveal (show)
+            
+            new_icon = "view-remove-symbolic" if not current_vis else "view-reveal-symbolic"
+            entry.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, new_icon)
 
     def on_unlock_clicked(self, widget):
         password = self.password_entry.get_text()

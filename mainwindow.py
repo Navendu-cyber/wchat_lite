@@ -24,6 +24,7 @@ class MainWindow(Gtk.Window):
 
         # Settings Button
         self.settings_btn = Gtk.Button()
+        self.settings_btn.set_relief(Gtk.ReliefStyle.NONE)
         icon = Gtk.Image.new_from_icon_name("emblem-system-symbolic", Gtk.IconSize.BUTTON)
         self.settings_btn.set_image(icon)
         self.settings_btn.connect("clicked", self.on_settings_clicked)
@@ -31,6 +32,7 @@ class MainWindow(Gtk.Window):
 
         # Lock Button
         self.lock_btn = Gtk.Button()
+        self.lock_btn.set_relief(Gtk.ReliefStyle.NONE)
         lock_icon = Gtk.Image.new_from_icon_name("system-lock-screen-symbolic", Gtk.IconSize.BUTTON)
         self.lock_btn.set_image(lock_icon)
         self.lock_btn.set_tooltip_text("Lock App")
@@ -64,38 +66,29 @@ class MainWindow(Gtk.Window):
 
     def setup_webview(self):
         settings = self.webview.get_settings()
-        settings.set_enable_webgl(False) # Keep disabled for RAM
+        settings.set_enable_webgl(True) # Enabled for performance
         settings.set_enable_accelerated_2d_canvas(True)
         settings.set_enable_smooth_scrolling(True)
         settings.set_enable_developer_extras(False)
+        
+        # Try enabling accelerated compositing
         try:
             settings.set_property("enable-accelerated-compositing", True)
         except TypeError:
-            pass # Property might not exist in this WebKit version
+            pass 
         
-        # RAM Optimization
+        # Try enabling smooth scrolling property explicitly if needed
+        try:
+            settings.set_property("enable-smooth-scrolling", True)
+        except TypeError:
+            pass
+
+        # RAM Optimization (keep cache model)
         context = WebKit2.WebContext.get_default()
         context.set_cache_model(WebKit2.CacheModel.DOCUMENT_VIEWER)
         
-        # Smooth Flow
-        # Note: set_preferred_frame_rate is not available in standard WebKit2 introspection 
-        # for some versions, but we can try setting it on the website settings if available 
-        # or just rely on compositing. 
-        # The user requested: ctx.set_preferred_frame_rate(120)
-        # This method might not exist on WebContext in python-gi.
-        # Let's check if we can do it, otherwise skip or use settings.
-        try:
-            # It seems this might be a specific request for a newer API or a misunderstanding.
-            # But let's try to find where it fits. 
-            # Actually, it's likely not exposed. We will skip the explicit call if it fails 
-            # but we enabled compositing which helps.
-            pass
-        except:
-            pass
-
-        # User Agent - Use Chrome to ensure Linux detection
-        # We use a standard Chrome User Agent. WhatsApp checks for "Chrome" and "Linux".
-        settings.set_user_agent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
+        # User Agent - Use standard Chrome to ensure Linux detection
+        settings.set_property("user-agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
 
         self.webview.connect("load-changed", self.on_load_changed)
         self.webview.load_uri("https://web.whatsapp.com")
@@ -107,13 +100,31 @@ class MainWindow(Gtk.Window):
     def inject_css(self):
         style = WHATSAPP_CSS
         # Inject CSS via JavaScript
-        # We wrap it in a function to append a style element
         js = f"""
         (function() {{
             var style = document.createElement('style');
             style.type = 'text/css';
             style.innerHTML = `{style}`;
             document.head.appendChild(style);
+
+            // Chat hover fix
+            var hoverStyle = document.createElement('style');
+            hoverStyle.innerHTML = `
+              /* Chat Row Hover Background */
+              .lhggkp7q:hover {{
+                 background: #F4F4F4 !important;
+              }}
+              /* Last message preview text */
+              ._ak8l {{
+                 color: #2a2a2a !important;
+                 opacity: 0.9 !important;
+              }}
+              /* On hover, darken for better visibility */
+              .lhggkp7q:hover ._ak8l {{
+                 color: #000000 !important;
+              }}
+            `;
+            document.head.appendChild(hoverStyle);
         }})();
         """
         self.webview.run_javascript(js, None, None, None)
