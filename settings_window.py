@@ -125,8 +125,9 @@ class SettingsWindow(Gtk.Dialog):
         features = [
             ("feature_app_lock", "Enable App Lock"),
             ("feature_notifications", "Desktop Notifications"),
+            ("feature_sync", "Background Sync (Poll Messages)"),
             ("feature_shortcuts", "Quick Lock (Ctrl+L)"),
-            ("feature_tray", "Tray Icon"),
+            ("feature_tray", "Tray Icon (Background Mode)"),
             ("feature_dragdrop", "Drag & Drop Sending")
         ]
         

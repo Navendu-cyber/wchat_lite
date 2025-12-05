@@ -12,7 +12,8 @@ DEFAULT_CONFIG = {
     "feature_tray": False,
     "feature_notifications": False,
     "feature_dragdrop": False,
-    "feature_app_lock": True
+    "feature_app_lock": True,
+    "feature_sync": False
 }
 
 class ConfigManager:

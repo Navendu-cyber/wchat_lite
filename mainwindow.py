@@ -60,9 +60,25 @@ class MainWindow(Gtk.Window):
         
         # Window state events (minimize)
         self.connect("window-state-event", self.on_window_state_event)
+        
+        # Handle Close (Minimize to Tray if enabled)
+        self.connect("delete-event", self.on_delete_event)
 
         self.show_all()
         self.lock_screen.hide() # Ensure it starts hidden unless locked immediately
+
+    def on_delete_event(self, widget, event):
+        # If Tray is enabled, hide window instead of closing
+        if self.config.get("feature_tray"):
+            self.hide()
+            
+            # Notify user that app is still running
+            notif = self.app.features.get("notifications")
+            if notif:
+                notif.show_notification("WChat Lite", "WChat lives in the taskbar.", force=True)
+                
+            return True # Prevent default destroy
+        return False # Let it close
 
     def setup_webview(self):
         settings = self.webview.get_settings()
@@ -138,7 +154,7 @@ class MainWindow(Gtk.Window):
             self.config.set("auto_lock_timeout", new_settings["auto_lock_timeout"])
             
             # Save feature settings
-            for key in ["feature_shortcuts", "feature_tray", "feature_notifications", "feature_dragdrop", "feature_app_lock"]:
+            for key in ["feature_shortcuts", "feature_tray", "feature_notifications", "feature_dragdrop", "feature_app_lock", "feature_sync"]:
                 if key in new_settings:
                     self.config.set(key, new_settings[key])
             

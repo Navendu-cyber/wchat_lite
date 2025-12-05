@@ -144,6 +144,26 @@ entry selection {
     padding: 40px;
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
 }
+
+/* Tray Menu Styling */
+menu {
+    background-color: #202c33;
+    color: #e9edef;
+    border: 1px solid #111b21;
+    padding: 5px;
+}
+
+menuitem {
+    padding: 4px 8px;
+}
+
+menuitem:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+menuitem label {
+    color: #e9edef;
+}
 """
 
 # CSS to inject into the WebView for WhatsApp Web

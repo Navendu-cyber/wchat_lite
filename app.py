@@ -8,6 +8,7 @@ from shortcuts import FeatureShortcuts
 from tray_icon import FeatureTrayIcon
 from notifications import FeatureNotifications
 from dragdrop import FeatureDragDrop
+from background_sync import BackgroundSync
 import time
 
 class WhatsAppLiteApp(Gtk.Application):
@@ -24,6 +25,7 @@ class WhatsAppLiteApp(Gtk.Application):
             "tray": FeatureTrayIcon(self),
             "notifications": FeatureNotifications(self),
             "dragdrop": FeatureDragDrop(self),
+            "sync": BackgroundSync(self),
         }
 
     def do_activate(self):

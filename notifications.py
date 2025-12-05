@@ -82,8 +82,17 @@ class FeatureNotifications:
             title = data.get("title", "WhatsApp")
             body = data.get("body", "New Message")
             
-            notification = Notify.Notification.new(title, body, "dialog-information")
-            notification.show()
+            self.show_notification(title, body)
             
         except Exception as e:
             print(f"Error handling notification: {e}")
+
+    def show_notification(self, title, body, force=False):
+        if (not self.is_enabled and not force) or not HAS_NOTIFY:
+            return
+            
+        try:
+            notification = Notify.Notification.new(title, body, "dialog-information")
+            notification.show()
+        except Exception as e:
+            print(f"Error showing notification: {e}")
